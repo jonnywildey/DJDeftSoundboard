@@ -389,6 +389,9 @@
       function preloadAudio() {
         let loadedCount = 0;
         let hasFinished = false;
+        let successfulLoads = 0;
+
+        console.log('Starting to preload', totalFiles, 'audio files');
 
         const updateProgress = () => {
           if (hasFinished) return;
@@ -398,6 +401,8 @@
           document.getElementById('loadingProgress').style.width = percentage + '%';
           document.getElementById('loadingText').textContent = percentage + '% loaded';
 
+          console.log(`Progress: ${loadedCount}/${totalFiles} files processed (${successfulLoads} successful)`);
+
           if (loadedCount === totalFiles) {
             finishLoading();
           }
@@ -406,6 +411,8 @@
         const finishLoading = () => {
           if (hasFinished) return;
           hasFinished = true;
+
+          console.log(`Finished loading: ${successfulLoads}/${totalFiles} files loaded successfully`);
 
           // All files loaded, show main content
           setTimeout(() => {
@@ -422,7 +429,7 @@
             document.getElementById('loadingText').textContent = 'continuing with on-demand loading...';
             finishLoading();
           }
-        }, 10000); // 10 second timeout
+        }, 15000); // 15 second timeout (increased for mobile)
 
         // Load electroswing files
         audioFiles.electroswing.forEach(filename => {
@@ -432,10 +439,28 @@
           const key = `electroswing_${filename}`;
           preloadedAudio[key] = audio;
 
-          audio.addEventListener('canplaythrough', updateProgress);
-          audio.addEventListener('error', () => {
-            console.error('Failed to load:', filename);
-            updateProgress(); // Still count as "loaded" to avoid hanging
+          let hasLoaded = false;
+
+          const markLoaded = () => {
+            if (!hasLoaded) {
+              hasLoaded = true;
+              successfulLoads++;
+              console.log('✓ Loaded:', filename);
+              updateProgress();
+            }
+          };
+
+          // Multiple events to catch successful loading
+          audio.addEventListener('loadeddata', markLoaded);
+          audio.addEventListener('canplay', markLoaded);
+          audio.addEventListener('canplaythrough', markLoaded);
+
+          audio.addEventListener('error', (e) => {
+            if (!hasLoaded) {
+              console.error('✗ Failed to load:', filename, 'Error:', e.type, e.message);
+              hasLoaded = true;
+              updateProgress(); // Still count as "loaded" to avoid hanging
+            }
           });
         });
 
@@ -447,10 +472,28 @@
           const key = `psytrance_${filename}`;
           preloadedAudio[key] = audio;
 
-          audio.addEventListener('canplaythrough', updateProgress);
-          audio.addEventListener('error', () => {
-            console.error('Failed to load:', filename);
-            updateProgress(); // Still count as "loaded" to avoid hanging
+          let hasLoaded = false;
+
+          const markLoaded = () => {
+            if (!hasLoaded) {
+              hasLoaded = true;
+              successfulLoads++;
+              console.log('✓ Loaded:', filename);
+              updateProgress();
+            }
+          };
+
+          // Multiple events to catch successful loading
+          audio.addEventListener('loadeddata', markLoaded);
+          audio.addEventListener('canplay', markLoaded);
+          audio.addEventListener('canplaythrough', markLoaded);
+
+          audio.addEventListener('error', (e) => {
+            if (!hasLoaded) {
+              console.error('✗ Failed to load:', filename, 'Error:', e.type, e.message);
+              hasLoaded = true;
+              updateProgress(); // Still count as "loaded" to avoid hanging
+            }
           });
         });
       }
