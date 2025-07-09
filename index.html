@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dj deft soundboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Comic Sans', Arial, sans-serif;
+      background-color: white;
+      color: black;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-transform: lowercase;
+    }
+
+    .header p {
+      font-size: 1.2em;
+      text-transform: lowercase;
+    }
+
+    .bank-selector {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .bank-btn {
+      background-color: #f0f0f0;
+      border: 2px solid black;
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-family: 'Comic Sans MS', 'Comic Sans', Arial, sans-serif;
+      font-size: 1.1em;
+      cursor: pointer;
+      text-transform: lowercase;
+    }
+
+    .bank-btn.active {
+      background-color: #ffff00;
+      font-weight: bold;
+    }
+
+    .bank-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .bank-btn.active:hover {
+      background-color: #ffff33;
+    }
+
+    .soundboard {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .sound-btn {
+      background-color: #f5f5f5;
+      border: 2px solid black;
+      padding: 15px;
+      font-family: 'Comic Sans MS', 'Comic Sans', Arial, sans-serif;
+      font-size: 0.9em;
+      cursor: pointer;
+      text-transform: lowercase;
+      word-wrap: break-word;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .sound-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    .sound-btn:active {
+      background-color: #d0d0d0;
+    }
+
+    .sound-btn.playing {
+      background-color: #00ff00;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .bank {
+      display: none;
+    }
+
+    .bank.active {
+      display: grid;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #666;
+      text-transform: lowercase;
+    }
+
+    .bank {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>dj deft soundboard</h1>
+  </div>
+
+  <div class="bank-selector">
+    <button class="bank-btn active" data-bank="electroswing">electroswing</button>
+    <button class="bank-btn" data-bank="psytrance">psytrance</button>
+  </div>
+
+  <div class="soundboard">
+    <div class="bank active" id="electroswing">
+      <button class="sound-btn" data-sound="Psychedelic Vobes.wav">psychedelic vobes</button>
+      <button class="sound-btn" data-sound="South London's Finest.wav">south london's finest</button>
+      <button class="sound-btn" data-sound="AnotherDJDeftMixClassic.wav">another dj deft mix classic</button>
+      <button class="sound-btn" data-sound="DizzyDeftExclusive.wav">dizzy deft exclusive</button>
+      <button class="sound-btn" data-sound="AllYourFaveElectroswing.wav">all your fave electroswing</button>
+      <button class="sound-btn" data-sound="HottestElectroswing.wav">hottest electroswing</button>
+      <button class="sound-btn" data-sound="FavouriteElectroswing.wav">favourite electroswing</button>
+      <button class="sound-btn" data-sound="IloveElectroswing.wav">i love electroswing</button>
+      <button class="sound-btn" data-sound="BackAtItAgain.wav">back at it again</button>
+      <button class="sound-btn" data-sound="SlowDJDeft.wav">slow dj deft</button>
+      <button class="sound-btn" data-sound="TheBestElectroswing.wav">the best electroswing</button>
+      <button class="sound-btn" data-sound="BestElectroswing.wav">best electroswing</button>
+      <button class="sound-btn" data-sound="DidYoufeelThatElectroswing.wav">did you feel that electroswing</button>
+      <button class="sound-btn" data-sound="Electroswing4lyfe.wav">electroswing 4 lyfe</button>
+      <button class="sound-btn" data-sound="KeepingItJazzy.wav">keeping it jazzy</button>
+      <button class="sound-btn" data-sound="ILoveElwctroSwing.wav">i love elwctro swing</button>
+      <button class="sound-btn" data-sound="CroydonsFinest.wav">croydon's finest</button>
+    </div>
+
+    <div class="bank" id="psytrance">
+      <button class="sound-btn" data-sound="TheGreatestPsytranceDJInTheWorld.wav">the greatest psytrance dj in the
+        world</button>
+      <button class="sound-btn" data-sound="South London's Finest.wav">south london's finest</button>
+      <button class="sound-btn" data-sound="DizzyDeft.wav">dizzy deft</button>
+      <button class="sound-btn" data-sound="Psychedelic Vobes.wav">psychedelic vobes</button>
+      <button class="sound-btn" data-sound="Psyyytrance.wav">psyyytrance</button>
+      <button class="sound-btn" data-sound="PstyranceHeater.wav">pstyrance heater</button>
+      <button class="sound-btn" data-sound="TheBestPsytrance.wav">the best psytrance</button>
+      <button class="sound-btn" data-sound="CominAtYa.wav">comin at ya</button>
+      <button class="sound-btn" data-sound="CroydonsFinest.wav">croydon's finest</button>
+      <button class="sound-btn" data-sound="BestInTheBiz.wav">best in the biz</button>
+      <button class="sound-btn" data-sound="DJDeftRadio1.wav">dj deft radio 1</button>
+      <button class="sound-btn" data-sound="PsytranceClassic.wav">psytrance classic</button>
+      <button class="sound-btn" data-sound="ILovePsytrance.wav">i love psytrance</button>
+      <button class="sound-btn" data-sound="DJDeftPlayingAllTheBestPsytrance.wav">dj deft playing all the best
+        psytrance</button>
+      <button class="sound-btn" data-sound="AnotherDJDeftMixClassic.wav">another dj deft mix classic</button>
+      <button class="sound-btn" data-sound="FinestInElectroswingPsytrance.wav">finest in electroswing psytrance</button>
+      <button class="sound-btn" data-sound="PsytranceShroom.wav">psytrance shroom</button>
+      <button class="sound-btn" data-sound="Psyyyyytrance.wav">psyyyyytrance</button>
+      <button class="sound-btn" data-sound="Psytrance4Lyfe.wav">psytrance 4 lyfe</button>
+      <button class="sound-btn" data-sound="DJ Deft.wav">dj deft</button>
+    </div>
+  </div>
+
+  <script>
+    // Audio management
+    let currentAudio = null;
+    let currentBank = 'electroswing';
+
+    // Bank switching
+    document.querySelectorAll('.bank-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const bankName = this.dataset.bank;
+
+        // Stop current audio if playing
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('playing'));
+        }
+
+        // Switch active bank button
+        document.querySelectorAll('.bank-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        // Switch active bank
+        document.querySelectorAll('.bank').forEach(b => b.classList.remove('active'));
+        document.getElementById(bankName).classList.add('active');
+
+        currentBank = bankName;
+      });
+    });
+
+    // Sound playing
+    document.querySelectorAll('.sound-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const soundFile = this.dataset.sound;
+        const bankFolder = currentBank === 'electroswing' ? 'Electroswing' : 'Psytrance';
+        const audioPath = `assets/audio/${bankFolder}/${soundFile}`;
+
+        // Stop current audio if playing
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('playing'));
+        }
+
+        // Play new audio
+        currentAudio = new Audio(audioPath);
+        this.classList.add('playing');
+
+        currentAudio.play().catch(e => {
+          console.error('Error playing audio:', e);
+          this.classList.remove('playing');
+        });
+
+        // Remove playing class when audio ends
+        currentAudio.addEventListener('ended', () => {
+          this.classList.remove('playing');
+          currentAudio = null;
+        });
+
+        // Remove playing class if audio fails to load
+        currentAudio.addEventListener('error', () => {
+          this.classList.remove('playing');
+          currentAudio = null;
+        });
+      });
+    });
+
+    // Stop all audio when clicking elsewhere
+    document.addEventListener('click', function (e) {
+      if (!e.target.classList.contains('sound-btn')) {
+        return;
+      }
+    });
+
+    // Keyboard shortcuts (space to stop all)
+    document.addEventListener('keydown', function (e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (currentAudio) {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+          document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('playing'));
+          currentAudio = null;
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
