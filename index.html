@@ -515,8 +515,16 @@
         const bankFolder = bankName === 'electroswing' ? 'Electroswing' : 'Psytrance';
         const audioPath = `assets/audio/${bankFolder}/${soundFile}`;
 
-        const audio = new Audio(audioPath);
+        const audio = new Audio();
+
+        // iOS-friendly approach: set source and load within user interaction
+        audio.src = audioPath;
         audio.preload = 'auto';
+
+        // For iOS, we need to ensure the audio is ready to play
+        if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+          audio.load(); // Force load on iOS
+        }
 
         return audio;
       }
@@ -547,7 +555,7 @@
           });
         });
 
-        // Sound playing with fallback
+        // Sound playing with iOS-compatible approach
         document.querySelectorAll('.sound-btn').forEach(btn => {
           btn.addEventListener('click', function () {
             const soundFile = this.dataset.sound;
@@ -560,22 +568,49 @@
               document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('playing'));
             }
 
-            // Try to get preloaded audio, fallback to on-demand loading
-            currentAudio = preloadedAudio[audioKey];
+            // iOS-friendly approach: Try preloaded first, then create fresh for iOS
+            let audioToPlay = preloadedAudio[audioKey];
 
-            if (!currentAudio) {
-              console.log('Audio not preloaded, loading on demand:', audioKey);
-              currentAudio = loadAudioOnDemand(soundFile, currentBank);
+            // For iOS compatibility, create a fresh audio object in the user interaction context
+            if (!audioToPlay || /iPhone|iPad|iPod|Safari/i.test(navigator.userAgent)) {
+              console.log('Creating fresh audio for iOS compatibility:', soundFile);
+              audioToPlay = loadAudioOnDemand(soundFile, currentBank);
             }
 
-            if (currentAudio) {
+            if (audioToPlay) {
+              currentAudio = audioToPlay;
               this.classList.add('playing');
               currentAudio.currentTime = 0; // Reset to beginning
 
-              currentAudio.play().catch(e => {
-                console.error('Error playing audio:', e);
-                this.classList.remove('playing');
-              });
+              // iOS requires the play() to be called directly in the user interaction
+              const playPromise = currentAudio.play();
+
+              if (playPromise !== undefined) {
+                playPromise.then(() => {
+                  console.log('✓ Audio started playing:', soundFile);
+                }).catch(e => {
+                  console.error('✗ Error playing audio:', soundFile, e);
+                  this.classList.remove('playing');
+
+                  // Fallback: try creating completely fresh audio with a small delay
+                  console.log('Trying fallback audio creation...');
+                  setTimeout(() => {
+                    const fallbackAudio = loadAudioOnDemand(soundFile, currentBank);
+                    if (fallbackAudio) {
+                      currentAudio = fallbackAudio;
+                      this.classList.add('playing');
+
+                      // Wait a moment for iOS to process the audio
+                      setTimeout(() => {
+                        fallbackAudio.play().catch(e2 => {
+                          console.error('✗ Fallback audio also failed:', e2);
+                          this.classList.remove('playing');
+                        });
+                      }, 100);
+                    }
+                  }, 50);
+                });
+              }
 
               // Remove playing class when audio ends
               const endHandler = () => {
@@ -585,7 +620,7 @@
 
               currentAudio.addEventListener('ended', endHandler, { once: true });
             } else {
-              console.error('Could not load audio:', audioKey);
+              console.error('Could not create audio:', audioKey);
             }
           });
         });
