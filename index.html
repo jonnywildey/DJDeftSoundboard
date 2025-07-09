@@ -133,6 +133,63 @@
       gap: 15px;
     }
 
+    /* Start Screen */
+    .start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .start-content {
+      text-align: center;
+      max-width: 400px;
+      padding: 20px;
+    }
+
+    .start-content h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-transform: lowercase;
+    }
+
+    .start-content p {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      text-transform: lowercase;
+    }
+
+    .start-btn {
+      background-color: #ffff00;
+      border: 2px solid black;
+      padding: 15px 30px;
+      font-family: 'Comic Sans MS', 'Comic Sans', Arial, sans-serif;
+      font-size: 1.3em;
+      cursor: pointer;
+      text-transform: lowercase;
+      margin-bottom: 10px;
+    }
+
+    .start-btn:hover {
+      background-color: #ffff33;
+    }
+
+    .start-btn:active {
+      background-color: #ffff66;
+    }
+
+    .start-note {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }
+
     /* Loading Screen */
     .loading-screen {
       position: fixed;
@@ -190,8 +247,17 @@
 </head>
 
 <body>
+  <!-- Start Screen -->
+  <div class="start-screen" id="startScreen">
+    <div class="start-content">
+      <h1>dj deft soundboard</h1>
+      <p>press the button to load the sickest beats</p>
+      <button class="start-btn" id="startBtn">tap to start</button>
+    </div>
+  </div>
+
   <!-- Loading Screen -->
-  <div class="loading-screen" id="loadingScreen">
+  <div class="loading-screen" id="loadingScreen" style="display: none;">
     <div class="loading-content">
       <h1>dj deft soundboard</h1>
       <p>loading the sickest beats...</p>
@@ -322,22 +388,41 @@
       // Preload all audio files
       function preloadAudio() {
         let loadedCount = 0;
+        let hasFinished = false;
 
         const updateProgress = () => {
+          if (hasFinished) return;
+
           loadedCount++;
           const percentage = Math.round((loadedCount / totalFiles) * 100);
           document.getElementById('loadingProgress').style.width = percentage + '%';
           document.getElementById('loadingText').textContent = percentage + '% loaded';
 
           if (loadedCount === totalFiles) {
-            // All files loaded, show main content
-            setTimeout(() => {
-              document.getElementById('loadingScreen').style.display = 'none';
-              document.getElementById('mainContent').style.display = 'block';
-              setupEventListeners();
-            }, 500);
+            finishLoading();
           }
         };
+
+        const finishLoading = () => {
+          if (hasFinished) return;
+          hasFinished = true;
+
+          // All files loaded, show main content
+          setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            setupEventListeners();
+          }, 500);
+        };
+
+        // Timeout fallback - if loading takes too long, continue anyway
+        setTimeout(() => {
+          if (!hasFinished) {
+            console.log('Preloading timed out, continuing with fallback loading');
+            document.getElementById('loadingText').textContent = 'continuing with on-demand loading...';
+            finishLoading();
+          }
+        }, 10000); // 10 second timeout
 
         // Load electroswing files
         audioFiles.electroswing.forEach(filename => {
@@ -370,7 +455,30 @@
         });
       }
 
-      // Setup event listeners after preloading
+
+
+      // Start button handler
+      document.getElementById('startBtn').addEventListener('click', function () {
+        // Hide start screen, show loading screen
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('loadingScreen').style.display = 'flex';
+
+        // Start preloading after user interaction
+        preloadAudio();
+      });
+
+      // Fallback: load audio on demand if preloading fails
+      function loadAudioOnDemand(soundFile, bankName) {
+        const bankFolder = bankName === 'electroswing' ? 'Electroswing' : 'Psytrance';
+        const audioPath = `assets/audio/${bankFolder}/${soundFile}`;
+
+        const audio = new Audio(audioPath);
+        audio.preload = 'auto';
+
+        return audio;
+      }
+
+      // Modified setupEventListeners for fallback support
       function setupEventListeners() {
         // Bank switching
         document.querySelectorAll('.bank-btn').forEach(btn => {
@@ -396,7 +504,7 @@
           });
         });
 
-        // Sound playing
+        // Sound playing with fallback
         document.querySelectorAll('.sound-btn').forEach(btn => {
           btn.addEventListener('click', function () {
             const soundFile = this.dataset.sound;
@@ -409,8 +517,13 @@
               document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('playing'));
             }
 
-            // Get preloaded audio
+            // Try to get preloaded audio, fallback to on-demand loading
             currentAudio = preloadedAudio[audioKey];
+
+            if (!currentAudio) {
+              console.log('Audio not preloaded, loading on demand:', audioKey);
+              currentAudio = loadAudioOnDemand(soundFile, currentBank);
+            }
 
             if (currentAudio) {
               this.classList.add('playing');
@@ -422,12 +535,14 @@
               });
 
               // Remove playing class when audio ends
-              currentAudio.addEventListener('ended', () => {
+              const endHandler = () => {
                 this.classList.remove('playing');
                 currentAudio = null;
-              });
+              };
+
+              currentAudio.addEventListener('ended', endHandler, { once: true });
             } else {
-              console.error('Audio not preloaded:', audioKey);
+              console.error('Could not load audio:', audioKey);
             }
           });
         });
@@ -445,9 +560,6 @@
           }
         });
       }
-
-      // Start preloading when page loads
-      window.addEventListener('load', preloadAudio);
     </script>
 </body>
 
